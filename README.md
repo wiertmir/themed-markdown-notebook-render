@@ -29,6 +29,10 @@ Code blocks are drawn, as on GitHub, when fenced as:
 | `geojson`, `topojson` | map on OpenStreetMap tiles (needs internet); click a feature for its properties |
 | `stl` | 3D model (ASCII STL); drag to rotate, scroll to zoom |
 
+![Mermaid flowchart and sequence diagram drawn in a notebook cell](images/mermaid-flowchart-sequence.png)
+
+![Mermaid class, state, pie and gantt diagrams](images/mermaid-class-state-pie-gantt.png)
+
 It works like VS Code's built-in `markdown-math`: a notebook renderer extending `vscode.markdown-it-renderer` adds a style to every Markdown cell, and the extension sends it the theme CSS.
 
 ## Install
