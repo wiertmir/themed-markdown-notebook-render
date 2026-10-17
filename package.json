@@ -1,0 +1,88 @@
+{
+  "name": "themed-markdown-notebook-render",
+  "displayName": "Themed Markdown Notebook Render",
+  "description": "Markdown cells in notebooks rendered in your theme's editor colours: headings, bold, links and code look as they do while editing.",
+  "version": "0.1.7",
+  "publisher": "wiertmir",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wiertmir/themed-markdown-notebook-render.git"
+  },
+  "engines": {
+    "vscode": "^1.75.0"
+  },
+  "categories": [
+    "Themes",
+    "Notebooks"
+  ],
+  "keywords": [
+    "markdown",
+    "notebook",
+    "jupyter",
+    "theme",
+    "colors"
+  ],
+  "main": "./extension.js",
+  "files": [
+    "extension.js",
+    "renderer.js",
+    "theme.js",
+    "images",
+    "LICENSE",
+    "README.md",
+    "vendor/**"
+  ],
+  "activationEvents": [
+    "onRenderer:wiertmir.themed-markdown-notebook-render"
+  ],
+  "contributes": {
+    "commands": [
+      {
+        "command": "themedMarkdownNotebookRender.selectTheme",
+        "title": "Select Theme…",
+        "category": "Themed Markdown"
+      }
+    ],
+    "menus": {
+      "extension/context": [
+        {
+          "command": "themedMarkdownNotebookRender.selectTheme",
+          "when": "extension == wiertmir.themed-markdown-notebook-render"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "Themed Markdown Notebook Render",
+      "properties": {
+        "themedMarkdownNotebookRender.theme": {
+          "type": "string",
+          "default": "",
+          "markdownDescription": "Colour theme for Markdown cells, by name as in `#workbench.colorTheme#` (e.g. `Monokai`). Empty uses the active theme. Pick one that suits the notebook background: only the text colours change."
+        }
+      }
+    },
+    "notebookRenderer": [
+      {
+        "id": "wiertmir.themed-markdown-notebook-render",
+        "displayName": "Themed Markdown",
+        "entrypoint": {
+          "extends": "vscode.markdown-it-renderer",
+          "path": "./renderer.js"
+        },
+        "requiresMessaging": "optional"
+      }
+    ]
+  },
+  "scripts": {
+    "test": "node test.js",
+    "package": "npx @vscode/vsce package",
+    "vscode:prepublish": "sh vendor.sh"
+  },
+  "devDependencies": {
+    "leaflet": "^1.9.4",
+    "mermaid": "^12.2.0",
+    "three": "^0.186.1",
+    "topojson-client": "^3.1.0"
+  }
+}
