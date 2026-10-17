@@ -52,4 +52,11 @@ assert.match(grid, /border-left: 1px solid #bbb !important; border-top: 1px soli
 assert.match(themeCss([], { 'themedMarkdown.tableBorder': '#aaa' }), /border-left: 1px solid #aaa/);  // inner defaults to outer
 assert.doesNotMatch(themeCss([]), /mark \{/);                                 // no colour, browser default
 assert.match(themeCss([], { 'themedMarkdown.markBackground': '#ccc' }), /#preview mark \{ background: #ccc/);
+// another theme than VS Code's paints the cell and re-points VS Code's colour variables
+assert.doesNotMatch(themeCss([], { 'editor.background': '#fff' }), /#preview \{/);
+const painted = themeCss([], { 'editor.background': '#fff', 'editor.foreground': '#000', 'textLink.foreground': '#00f', '[X]': { a: 1 } }, true);
+assert.match(painted, /--vscode-textLink-foreground: #00f/);
+assert.match(painted, /background: #fff !important/);
+assert.match(painted, /color: #000 !important/);
+assert.doesNotMatch(painted, /\[X\]/);                                        // per-theme customization blocks skipped
 console.log('ok');

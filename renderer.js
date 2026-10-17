@@ -10,7 +10,10 @@ document.head.appendChild(template);
 // Fences in these languages become a placeholder holding their source; a viewer (loaded on first use) draws into it
 // once the cell is in the DOM. Mermaid diagrams are drawn again when VS Code switches between light and dark.
 const escapeHtml = s => s.replace(/&/g, '&amp;').replace(/</g, '&lt;');
-const mermaidTheme = () => ['vscode-light', 'vscode-high-contrast-light'].some(c => document.body.classList.contains(c)) ? 'default' : 'dark';
+// a theme chosen for the cells says whether it is dark; otherwise follow VS Code's
+let chosenDark;
+const isDark = () => chosenDark ?? !['vscode-light', 'vscode-high-contrast-light'].some(c => document.body.classList.contains(c));
+const mermaidTheme = () => isDark() ? 'dark' : 'default';
 let mermaid, theme, n = 0;
 
 async function drawMermaid(target, src) {
@@ -85,11 +88,13 @@ async function draw(target) {
   }
 }
 
-// VS Code toggles vscode-light / vscode-dark on <body> when the theme changes
-new MutationObserver(async () => {
+async function redrawMermaid() {
   if (!mermaid || theme === mermaidTheme()) return;
   for (const el of placeholders()) if (el.dataset.lang === 'mermaid') await draw(el);
-}).observe(document.body, { attributes: true, attributeFilter: ['class'] });
+}
+
+// VS Code toggles vscode-light / vscode-dark on <body> when the theme changes
+new MutationObserver(redrawMermaid).observe(document.body, { attributes: true, attributeFilter: ['class'] });
 
 export async function activate(ctx) {
   const markdownIt = await ctx.getRenderer('vscode.markdown-it-renderer');
@@ -105,11 +110,13 @@ export async function activate(ctx) {
     };
   });
 
-  ctx.onDidReceiveMessage?.(css => {
+  ctx.onDidReceiveMessage?.(({ css, dark }) => {
     style.textContent = css;
     // cells rendered before keep their own copy of the style
     for (const el of document.querySelectorAll('*'))
       el.shadowRoot?.querySelectorAll('style.themed-markdown').forEach(s => { s.textContent = css; });
+    chosenDark = dark;
+    redrawMermaid();
   });
   ctx.postMessage?.('ready');  // ask the extension for the current theme's CSS
 }

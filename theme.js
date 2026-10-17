@@ -96,8 +96,20 @@ function tableCss(colors) {
   return css;
 }
 
-function themeCss(rules, colors = {}) {
-  let css = '';
+// A theme other than VS Code's also paints the cell: its background and text, and VS Code's --vscode-* colour
+// variables re-pointed at its colours, so what VS Code styles inside the cell (inline code, links, errors) follows.
+function paintCss(colors) {
+  const vars = Object.entries(colors).filter(([k, v]) => typeof v === 'string' && /^[\w.-]+$/.test(k))
+    .map(([k, v]) => `--vscode-${k.replace(/\./g, '-')}: ${v}`);
+  const bg = colors['notebook.editorBackground'] ?? colors['editor.background'];
+  const fg = colors['editor.foreground'] ?? colors.foreground;
+  if (bg) vars.push(`background: ${bg} !important`, `box-shadow: 0 0 0 12px ${bg}`, 'border-radius: 1px');  // shadow pads without moving text
+  if (fg) vars.push(`color: ${fg} !important`);
+  return vars.length ? `#preview { ${vars.join('; ')}; }\n` : '';
+}
+
+function themeCss(rules, colors = {}, paint = false) {
+  let css = paint ? paintCss(colors) : '';
   for (const [selector, scopes] of Object.entries(ELEMENTS)) {
     const stack = [...scopes, 'text.html.markdown'];
     const decls = declarations(resolve(rules, stack, 'foreground'), resolve(rules, stack, 'fontStyle'));

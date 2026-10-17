@@ -3,10 +3,12 @@ const fs = require('fs');
 const path = require('path');
 const { parseJsonc, themeCss } = require('./theme');
 
-let css = '';
+let message = { css: '' };  // what the renderer gets: { css, dark } (dark only for a chosen theme)
+
+const chosenTheme = () => vscode.workspace.getConfiguration('themedMarkdownNotebookRender').get('theme');
 
 function themeId() {
-  const chosen = vscode.workspace.getConfiguration('themedMarkdownNotebookRender').get('theme');
+  const chosen = chosenTheme();
   if (chosen) return chosen;
   const cfg = vscode.workspace.getConfiguration('workbench');
   if (vscode.workspace.getConfiguration('window').get('autoDetectColorScheme')) {
@@ -31,11 +33,12 @@ function loadTheme(file) {
   return {
     rules: Array.isArray(theme.tokenColors) ? base.rules.concat(theme.tokenColors) : base.rules,
     colors: { ...base.colors, ...theme.colors },
+    type: theme.type ?? base.type,
   };
 }
 
 function refresh() {
-  const id = themeId();
+  const id = themeId(), chosen = chosenTheme();
   let theme = { rules: [], colors: {} };
   try {
     const file = themeFile(id);
@@ -48,7 +51,8 @@ function refresh() {
   const custom = vscode.workspace.getConfiguration('editor').get('tokenColorCustomizations') ?? {};
   const rules = theme.rules.concat(custom.textMateRules ?? [], custom[`[${id}]`]?.textMateRules ?? []);
   const customColors = vscode.workspace.getConfiguration('workbench').get('colorCustomizations') ?? {};
-  css = themeCss(rules, { ...theme.colors, ...customColors, ...customColors[`[${id}]`] });
+  const css = themeCss(rules, { ...theme.colors, ...customColors, ...customColors[`[${id}]`] }, !!chosen);
+  message = { css, dark: chosen && theme.type ? theme.type === 'dark' || theme.type === 'hc' : undefined };
 }
 
 // Gear menu on the extension's page: pick the theme for notebook markdown from the installed ones.
@@ -71,10 +75,10 @@ async function selectTheme() {
 function activate(context) {
   refresh();
   const messaging = vscode.notebooks.createRendererMessaging('wiertmir.themed-markdown-notebook-render');
-  const update = () => { refresh(); messaging.postMessage(css); };
+  const update = () => { refresh(); messaging.postMessage(message); };
   context.subscriptions.push(
     vscode.commands.registerCommand('themedMarkdownNotebookRender.selectTheme', selectTheme),
-    messaging.onDidReceiveMessage(({ editor }) => messaging.postMessage(css, editor)),  // renderer asks when it loads
+    messaging.onDidReceiveMessage(({ editor }) => messaging.postMessage(message, editor)),  // renderer asks when it loads
     vscode.window.onDidChangeActiveColorTheme(update),
     vscode.workspace.onDidChangeConfiguration(e => {
       if (e.affectsConfiguration('workbench.colorTheme') || e.affectsConfiguration('themedMarkdownNotebookRender.theme') || e.affectsConfiguration('editor.tokenColorCustomizations') || e.affectsConfiguration('workbench.colorCustomizations')) update();
