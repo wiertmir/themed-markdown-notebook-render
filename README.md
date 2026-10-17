@@ -8,7 +8,7 @@ Markdown cells in VS Code notebooks (Jupyter `.ipynb` and others) render with on
 
 Colours come from the active theme's `tokenColors` (including themes it `include`s) plus your `editor.tokenColorCustomizations`. Switch theme and the open notebooks follow.
 
-To use another theme's colours than the active one, click the gear on the extension's page and choose **Select Theme…** (also *Themed Markdown: Select Theme…* in the Command Palette), or set `themedMarkdownNotebookRender.theme` to its name. Empty follows the active theme. A chosen theme also paints each Markdown cell with its own background (so a light theme works in a dark VS Code), and Mermaid diagrams follow its light or dark. Code cells and the space between cells keep VS Code's theme: a renderer can only draw inside its cells.
+To use another theme's colours than the active one, click the gear on the extension's page and choose **Select Theme…** (also *Themed Markdown: Select Theme…* in the Command Palette), or set `themedMarkdownNotebookRender.theme` to its name. Empty follows the active theme. Only the text colours change, so pick a theme that suits VS Code's background, or turn on `themedMarkdownNotebookRender.paintBackground` to paint each Markdown cell with the chosen theme's background (so a light theme works in a dark VS Code) and have Mermaid diagrams follow its light or dark. Code cells and the space between cells keep VS Code's theme: a renderer can only draw inside its cells.
 
 Tables are a plain grid unless the theme (or your `workbench.colorCustomizations`) sets any of these colours; each one switches on its part:
 

@@ -2,7 +2,7 @@
   "name": "themed-markdown-notebook-render",
   "displayName": "Themed Markdown Notebook Render",
   "description": "Markdown cells in notebooks rendered in your theme's editor colours: headings, bold, links and code look as they do while editing.",
-  "version": "0.1.8",
+  "version": "0.1.9",
   "publisher": "wiertmir",
   "icon": "images/icon.png",
   "license": "MIT",
@@ -59,7 +59,12 @@
         "themedMarkdownNotebookRender.theme": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Colour theme for Markdown cells, by name as in `#workbench.colorTheme#` (e.g. `Monokai`). Empty uses the active theme. A theme other than the active one also paints the cells with its own background."
+          "markdownDescription": "Colour theme for Markdown cells, by name as in `#workbench.colorTheme#` (e.g. `Monokai`). Empty uses the active theme."
+        },
+        "themedMarkdownNotebookRender.paintBackground": {
+          "type": "boolean",
+          "default": false,
+          "markdownDescription": "Paint Markdown cells with the background of the theme chosen in `#themedMarkdownNotebookRender.theme#`, and switch Mermaid diagrams to its light or dark. Off: only the text colours change, so pick a theme that suits VS Code's background. No effect when following the active theme."
         }
       }
     },
