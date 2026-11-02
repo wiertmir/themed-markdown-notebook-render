@@ -2,7 +2,7 @@
   "name": "themed-markdown-notebook-render",
   "displayName": "Themed Markdown Notebook Render",
   "description": "Markdown cells in notebooks rendered in your theme's editor colours: headings, bold, links and code look as they do while editing.",
-  "version": "0.1.10",
+  "version": "0.1.11",
   "publisher": "wiertmir",
   "icon": "images/icon.png",
   "license": "MIT",
