@@ -72,33 +72,33 @@ function declarations(fg, fontStyle) {
   return out;
 }
 
-const scoped = selector => selector.split(',').map(s => `#preview ${s.trim()}`).join(', ');
+const scoped = (selector, root) => selector.split(',').map(s => `${root} ${s.trim()}`).join(', ');
 
 // Table look from optional theme colours (`colors` in the theme file, or workbench.colorCustomizations):
 // themedMarkdown.tableBorder (outline and header line), .tableInnerBorder (grid inside, defaults to tableBorder),
 // .tableHeaderBackground, .tableHeaderForeground, .tableStripeBackground.
 // Each one present switches on its part; a theme without them keeps VS Code's plain grid.
-function tableCss(colors) {
+function tableCss(colors, root) {
   const c = name => colors[`themedMarkdown.table${name}`];
   const outer = c('Border'), inner = c('InnerBorder') ?? outer;
   let css = '';
-  if (outer) css += `#preview table { border-collapse: separate !important; border-spacing: 0; border: 1px solid ${outer} !important; border-radius: 6px; overflow: hidden; }
-#preview th, #preview td { border: none !important; border-left: 1px solid ${inner} !important; border-top: 1px solid ${inner} !important; }
-#preview tr > :first-child { border-left: none !important; }
-#preview thead th { border-top: none !important; }
-#preview thead + tbody > tr:first-child > td { border-top-color: ${outer} !important; }\n`;
-  if (c('HeaderBackground')) css += `#preview thead th { background: ${c('HeaderBackground')} !important; }\n`;
-  if (c('HeaderForeground')) css += `#preview thead th { color: ${c('HeaderForeground')} !important; }\n`;
-  if (c('StripeBackground')) css += `#preview tbody tr:nth-child(even) { background: ${c('StripeBackground')} !important; }\n`;
+  if (outer) css += `${root} table { border-collapse: separate !important; border-spacing: 0; border: 1px solid ${outer} !important; border-radius: 6px; overflow: hidden; }
+${root} th, ${root} td { border: none !important; border-left: 1px solid ${inner} !important; border-top: 1px solid ${inner} !important; }
+${root} tr > :first-child { border-left: none !important; }
+${root} thead th { border-top: none !important; }
+${root} thead + tbody > tr:first-child > td { border-top-color: ${outer} !important; }\n`;
+  if (c('HeaderBackground')) css += `${root} thead th { background: ${c('HeaderBackground')} !important; }\n`;
+  if (c('HeaderForeground')) css += `${root} thead th { color: ${c('HeaderForeground')} !important; }\n`;
+  if (c('StripeBackground')) css += `${root} tbody tr:nth-child(even) { background: ${c('StripeBackground')} !important; }\n`;
   // <mark>: themedMarkdown.markBackground, else the browser's yellow
   const markBg = colors['themedMarkdown.markBackground'];
-  if (markBg) css += `#preview mark { background: ${markBg} !important; border-radius: 3px; padding: 0 2px; }\n`;
+  if (markBg) css += `${root} mark { background: ${markBg} !important; border-radius: 3px; padding: 0 2px; }\n`;
   return css;
 }
 
 // A theme other than VS Code's also paints the cell: its background and text, and VS Code's --vscode-* colour
 // variables re-pointed at its colours, so what VS Code styles inside the cell (inline code, links, errors) follows.
-function paintCss(colors) {
+function paintCss(colors) {  // notebook cells only
   const vars = Object.entries(colors).filter(([k, v]) => typeof v === 'string' && /^[\w.-]+$/.test(k))
     .map(([k, v]) => `--vscode-${k.replace(/\./g, '-')}: ${v}`);
   const bg = colors['notebook.editorBackground'] ?? colors['editor.background'];
@@ -108,18 +108,19 @@ function paintCss(colors) {
   return vars.length ? `#preview { ${vars.join('; ')}; }\n` : '';
 }
 
-function themeCss(rules, colors = {}, paint = false) {
+// root: what the rules hang on, '#preview' in a notebook cell, 'body' in the Markdown preview.
+function themeCss(rules, colors = {}, paint = false, root = '#preview') {
   let css = paint ? paintCss(colors) : '';
   for (const [selector, scopes] of Object.entries(ELEMENTS)) {
     const stack = [...scopes, 'text.html.markdown'];
     const decls = declarations(resolve(rules, stack, 'foreground'), resolve(rules, stack, 'fontStyle'));
-    if (decls.length) css += `${scoped(selector)} { ${decls.map(d => d + ' !important').join('; ')}; }\n`;
+    if (decls.length) css += `${scoped(selector, root)} { ${decls.map(d => d + ' !important').join('; ')}; }\n`;
   }
   for (const [selector, scopes] of Object.entries(BORDERS)) {
     const fg = resolve(rules, [...scopes, 'text.html.markdown'], 'foreground');
-    if (fg) css += `${scoped(selector)} { border-color: ${fg} !important; }\n`;
+    if (fg) css += `${scoped(selector, root)} { border-color: ${fg} !important; }\n`;
   }
-  return css + tableCss(colors);
+  return css + tableCss(colors, root);
 }
 
 module.exports = { parseJsonc, resolve, themeCss };

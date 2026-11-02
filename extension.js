@@ -4,6 +4,7 @@ const path = require('path');
 const { parseJsonc, themeCss } = require('./theme');
 
 let message = { css: '' };  // what the renderer gets: { css, dark } (dark only when painting a chosen theme)
+let previewCss = '';        // same colours for the Markdown preview, hung on <body>
 
 const chosenTheme = () => vscode.workspace.getConfiguration('themedMarkdownNotebookRender').get('theme');
 // a chosen theme paints the cell with its own background only when asked; else only text colours change
@@ -54,6 +55,9 @@ function refresh() {
   const rules = theme.rules.concat(custom.textMateRules ?? [], custom[`[${id}]`]?.textMateRules ?? []);
   const customColors = vscode.workspace.getConfiguration('workbench').get('colorCustomizations') ?? {};
   const css = themeCss(rules, { ...theme.colors, ...customColors, ...customColors[`[${id}]`] }, paint);
+  previewCss = themeCss(rules, { ...theme.colors, ...customColors, ...customColors[`[${id}]`] }, false, 'body');
+  // Markdown preview loads this file through markdown.previewStyles
+  try { fs.writeFileSync(path.join(__dirname, 'preview.css'), previewCss); } catch (e) { console.error('themed-markdown: cannot write preview.css:', e); }
   message = { css, dark: paint && theme.type ? theme.type === 'dark' || theme.type === 'hc' : undefined };
 }
 
@@ -77,7 +81,7 @@ async function selectTheme() {
 function activate(context) {
   refresh();
   const messaging = vscode.notebooks.createRendererMessaging('wiertmir.themed-markdown-notebook-render');
-  const update = () => { refresh(); messaging.postMessage(message); };
+  const update = () => { refresh(); messaging.postMessage(message); vscode.commands.executeCommand('markdown.preview.refresh'); };
   context.subscriptions.push(
     vscode.commands.registerCommand('themedMarkdownNotebookRender.selectTheme', selectTheme),
     messaging.onDidReceiveMessage(({ editor }) => messaging.postMessage(message, editor)),  // renderer asks when it loads
