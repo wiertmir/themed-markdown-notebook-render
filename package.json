@@ -2,7 +2,7 @@
   "name": "themed-markdown-notebook-render",
   "displayName": "Themed Markdown Notebook Render",
   "description": "Markdown cells in notebooks rendered in your theme's editor colours: headings, bold, links and code look as they do while editing.",
-  "version": "0.1.11",
+  "version": "0.1.12",
   "publisher": "wiertmir",
   "icon": "images/icon.png",
   "license": "MIT",
@@ -26,7 +26,8 @@
   ],
   "main": "./extension.js",
   "files": [
-    "extension.js", "preview.css",
+    "extension.js",
+    "preview.css",
     "renderer.js",
     "theme.js",
     "images",
@@ -36,10 +37,12 @@
   ],
   "activationEvents": [
     "onRenderer:wiertmir.themed-markdown-notebook-render",
-		"onLanguage:markdown"
+    "onLanguage:markdown"
   ],
   "contributes": {
-		"markdown.previewStyles": ["./preview.css"],
+    "markdown.previewStyles": [
+      "./preview.css"
+    ],
     "commands": [
       {
         "command": "themedMarkdownNotebookRender.selectTheme",
